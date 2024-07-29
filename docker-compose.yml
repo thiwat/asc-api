@@ -1,0 +1,20 @@
+version: "3.0"
+services:
+  asc-api:
+    build:
+      context: .
+    image: asc-api:latest
+    container_name: asc-api
+    restart: always
+    env_file: .env
+    ports:
+      - "3000:3000"
+    networks:
+      static-network-api:
+        ipv4_address: 172.109.9.5
+
+networks:
+  static-network-api:
+    ipam:
+      config:
+        - subnet: 172.109.9.0/16
