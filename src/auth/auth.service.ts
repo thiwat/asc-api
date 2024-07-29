@@ -25,12 +25,14 @@ import { CommonResult } from 'src/common/dto/common_result.dto';
 import { Application } from 'src/application/application.schema';
 import { UserRole } from 'src/common/enums/role.enum';
 import { UserState } from 'src/common/enums/user_state.enum';
+import { LineService } from 'src/line/line.service';
 
 @Injectable()
 export class AuthService {
   private logger: Logger
   constructor(
     private applicationService: ApplicationService,
+    private lineService: LineService,
     private userService: UserService
   ) {
     this.logger = logger.child({ service: this.constructor.name })
@@ -124,11 +126,7 @@ export class AuthService {
 
     const app = await this._getApp(input.app_key, input.secret_key)
 
-    const lineProfile = {
-      sub: '123456',
-      name: 'Thiwat N',
-      picture: 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png'
-    }
+    const lineProfile = await this.lineService.getProfile(input.line_token)
 
     let user = await this.userService.find({
       social: { line: lineProfile.sub }
