@@ -13,11 +13,11 @@ import { Public } from "src/common/decorators/public.decorator";
 import { AuthenticationSettings } from "./dto/authentication.dto";
 import { DEFAULT_ADMIN_TRANSLATE, DEFAULT_SITE_TRANSLATE } from "src/common/constants/translates";
 import { SecuritySetting } from "./dto/security.dto";
-import { SearchSettings } from "./dto/search.dto";
 import { AttachmentSetting } from "./dto/attachment.dto";
 import { SiteSetting } from "./dto/site.dto";
 import { Basic } from "src/common/decorators/basic.decorator";
 import { Application } from "src/common/decorators/application.decorator";
+import { OrderSettings } from "./dto/order.dto";
 
 const DEFAULT_LOCALE = 'en-US'
 
@@ -61,19 +61,6 @@ export class SettingController {
     return await this.service.setSetting('attachment', data, 'attachment')
   }
 
-  @Get('/search')
-  async getSearchSetting(): Promise<SearchSettings> {
-    return await this.service.getSetting('search', 'search', {})
-  }
-
-  @Put('/search')
-  async setSearchSetting(
-    @Body() data: SearchSettings
-  ): Promise<SearchSettings> {
-    return await this.service.setSetting('search', data, 'search')
-  }
-
-
   @Get('/site')
   async getSiteSetting(): Promise<SiteSetting> {
     return await this.service.getSetting('site', 'site', {})
@@ -84,6 +71,18 @@ export class SettingController {
     @Body() data: SiteSetting
   ): Promise<SiteSetting> {
     return await this.service.setSetting('site', data, 'site')
+  }
+
+  @Get('/order')
+  async getOrderSetting(): Promise<OrderSettings> {
+    return await this.service.getSetting('order', 'order', {})
+  }
+
+  @Put('/order')
+  async setOrderSetting(
+    @Body() data: OrderSettings
+  ): Promise<OrderSettings> {
+    return await this.service.setSetting('order', data, 'order')
   }
 
   @Get('/security')

@@ -13,6 +13,8 @@ import { AttachmentModule } from "./attachment/attachment.module";
 import { CmsBlockModule } from "./cms_block/cms_block.module";
 import { CmsPageModule } from "./cms_page/cms_page.module";
 import { RewriteUrlModule } from "./rewrite_url/rewrite_url.module";
+import { EventModule } from "./event/event.module";
+import { OrderModule } from "./order/order.module";
 
 dotenv.config();
 
@@ -27,7 +29,9 @@ dotenv.config();
     AuthModule,
     CmsBlockModule,
     CmsPageModule,
+    EventModule,
     SettingModule,
+    OrderModule,
     RewriteUrlModule,
     UserModule,
   ],
