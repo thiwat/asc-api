@@ -15,6 +15,7 @@ import { CmsPageModule } from "./cms_page/cms_page.module";
 import { RewriteUrlModule } from "./rewrite_url/rewrite_url.module";
 import { EventModule } from "./event/event.module";
 import { OrderModule } from "./order/order.module";
+import { TicketModule } from "./ticket/ticket.module";
 
 dotenv.config();
 
@@ -33,6 +34,7 @@ dotenv.config();
     SettingModule,
     OrderModule,
     RewriteUrlModule,
+    TicketModule,
     UserModule,
   ],
   controllers: [AppController],

@@ -11,3 +11,16 @@ export class PlaceOrderInput {
   @IsPositive()
   quantity?: number;
 }
+
+export class UploadSlipInput {
+  @IsString()
+  order_no: string;
+
+  @IsString()
+  slip_url: string;
+}
+
+export class ApprovePaymentInput {
+  @IsString()
+  order_no: string;
+}

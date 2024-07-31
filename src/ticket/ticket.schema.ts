@@ -1,4 +1,3 @@
-import * as mongoose from 'mongoose'
 import { Prop, Schema } from "@nestjs/mongoose";
 import { BaseSchema, BaseSchemaFactory } from "src/common/base/base.schema";
 
@@ -9,9 +8,9 @@ import { BaseSchema, BaseSchemaFactory } from "src/common/base/base.schema";
     updatedAt: 'updated_at'
   }
 })
-export class Order extends BaseSchema {
+export class Ticket extends BaseSchema {
   @Prop({ required: true })
-  order_no: string;
+  code: string;
 
   @Prop({ required: true })
   user_id: string;
@@ -21,13 +20,7 @@ export class Order extends BaseSchema {
 
   @Prop({})
   status: string;
-
-  @Prop({})
-  quantity: number;
-
-  @Prop({ type: mongoose.Schema.Types.Mixed })
-  slip_url: any;
 }
 
-export const OrderSchema = BaseSchemaFactory.createForClass(Order);
-OrderSchema.index({ order_no: 1 }, { unique: true })
+export const TicketSchema = BaseSchemaFactory.createForClass(Ticket);
+TicketSchema.index({ code: 1 }, { unique: true })

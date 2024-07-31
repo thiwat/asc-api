@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  Patch,
   Post,
   Query
 } from "@nestjs/common";
@@ -11,7 +12,7 @@ import { SearchResultDto } from "src/common/dto/search_result.dto";
 import { UserRole } from "src/common/enums/role.enum";
 import { convertFilter } from "src/common/utils/filter";
 import { OrderService } from "./order.service";
-import { PlaceOrderInput } from "./order.dto";
+import { ApprovePaymentInput, PlaceOrderInput, UploadSlipInput } from "./order.dto";
 import { Profile } from "src/common/decorators/profile.decorator";
 import { Order } from "./order.schema";
 
@@ -39,5 +40,20 @@ export class OrderController {
     @Profile() profile: any
   ): Promise<Order> {
     return await this.service.placeOrder(data, profile)
+  }
+
+  @Patch('/slip')
+  async uploadSlip(
+    @Body() data: UploadSlipInput,
+    @Profile() profile: any
+  ): Promise<Order> {
+    return await this.service.uploadSlip(data, profile)
+  }
+
+  @Patch('/approve')
+  async approvePayment(
+    @Body() data: ApprovePaymentInput
+  ): Promise<Order> {
+    return await this.service.approvePayment(data)
   }
 }

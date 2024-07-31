@@ -2,11 +2,11 @@ import * as _ from "lodash";
 
 import { Module } from "@nestjs/common";
 import { MongooseModule } from "@nestjs/mongoose";
-import { RewriteUrlModule } from "src/rewrite_url/rewrite_url.module";
 import { Order, OrderSchema } from "./order.schema";
 import { OrderController } from "./order.controller";
 import { OrderService } from "./order.service";
 import { EventModule } from "src/event/event.module";
+import { TicketModule } from "src/ticket/ticket.module";
 
 
 @Module({
@@ -20,7 +20,8 @@ import { EventModule } from "src/event/event.module";
         },
       },
     ]),
-    EventModule
+    EventModule,
+    TicketModule
   ],
   controllers: [OrderController],
   providers: [OrderService],
