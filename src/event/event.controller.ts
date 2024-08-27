@@ -16,6 +16,7 @@ import { convertFilter } from "src/common/utils/filter";
 import { EventService } from "./event.service";
 import { Event } from "./event.schema";
 import { EventInput } from "./event.dto";
+import { Profile } from "src/common/decorators/profile.decorator";
 
 @Controller({
   path: 'event',
@@ -32,6 +33,13 @@ export class EventController {
   ): Promise<SearchResultDto> {
     query.filter = convertFilter(query.filter)
     return this.service.search(query)
+  }
+
+  @Get('/me')
+  async myEvents(
+    @Profile() profile: any
+  ): Promise<SearchResultDto> {
+    return this.service.myEvents(profile)
   }
 
   @Get('/:code')

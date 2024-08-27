@@ -9,37 +9,19 @@ import { InjectModel } from '@nestjs/mongoose';
 import { SYSTEM_ADMIN_EMAIL, SYSTEM_ADMIN_USERNAME } from './user.constant';
 import { generateHash } from 'src/common/utils/hash';
 import {
-  ActivateAccountInput,
   CreateUserInput,
-  ForgotPasswordInput,
-  ForgotPasswordOutput,
   LoginInput,
   LoginOutput,
-  RegisterInput,
-  RegisterOutput,
-  ResendOtpInput,
-  ResendOtpOutput,
-  ResetPasswordInput,
-  UpdateMyProfileInput,
-  VerifyOtpInput
 } from './user.dto';
 import { UserRole } from 'src/common/enums/role.enum';
 import { Profile } from 'src/common/dto/profile.dto';
 import { UserState } from 'src/common/enums/user_state.enum';
-import { generateOtp, resendOtp, validateOtp } from 'src/common/utils/otp';
-import { CommonResult } from 'src/common/dto/common_result.dto';
 import { throwError } from 'src/common/utils/error';
 import { AuthenticationSettings } from 'src/setting/dto/authentication.dto';
 import { SettingService } from 'src/setting/setting.service';
-import { RESET_PASSWORD_TOKEN_LENGTH, validatePasswordCase } from 'src/common/utils/password';
+import { validatePasswordCase } from 'src/common/utils/password';
 import { randomString } from 'src/common/utils/random';
-import { REF_LENGTH } from 'src/common/utils/otp'
-import { generateRegisterKey, generateResetPasswordToken, generateTokenKey } from 'src/common/utils/key';
-import { redisCache, redisSession } from 'src/common/utils/redis';
-import { OtpAction } from 'src/common/enums/otp.enum';
-import { AuthenticationOutput } from 'src/auth/auth.dto';
 import { ApplicationService } from 'src/application/application.service';
-import { ACCESS_TOKEN_LENGTH, ACCESS_TOKEN_TTL } from 'src/auth/auth.constant';
 import { SearchQueryDto } from 'src/common/dto/search_query.dto';
 import { SearchResultDto } from 'src/common/dto/search_result.dto';
 import { Application } from 'src/application/application.schema';
@@ -217,7 +199,6 @@ export class UserService extends BaseService<User> {
   public async create(data: Partial<User>): Promise<User> {
     data['user_id'] = uuid()
     data['state'] = data.state || UserState.staged
-    data['full_name'] = `${data['first_name']} ${data['last_name']}`
     if (data.profile_image) {
       data.profile_image = await this._prepareImageData(data.profile_image, {})
     }
@@ -281,164 +262,11 @@ export class UserService extends BaseService<User> {
     return await this.update(user.id, { state: UserState.active })
   }
 
-  public async activateAccount(input: ActivateAccountInput): Promise<User> {
-
-    const settings = await this._getAuthenticationSetting()
-    const user = await this.findByUserId(input.user_id)
-
-    const newPassword = generateHash(input.password, user['created_at'])
-    const { password_histories } = await this._checkValidPassword(
-      input.password,
-      newPassword,
-      user,
-      settings
-    )
-
-    return await this.update(user.id, {
-      state: UserState.active,
-      last_logged_in_at: new Date(),
-      password: newPassword,
-      password_histories,
-      password_information: {
-        password_at: new Date(),
-        wrong_attempt: 0
-      },
-    })
-  }
-
   public async myProfile(profile: Profile): Promise<User> {
     const res = await this.find({
       user_id: profile.user_id
     })
     return res
-  }
-
-  public async updateMyProfile(data: UpdateMyProfileInput, profile: Profile): Promise<User> {
-    const res = await this.find({
-      user_id: profile.user_id
-    })
-
-    if (data.profile_image) {
-      data.profile_image = await this._prepareImageData(data.profile_image, res?.profile_image)
-    }
-
-    return await this.update(res.id, _.pick(data, [
-      'full_name',
-      'first_name',
-      'last_name',
-      'profile_image',
-      'mobile_no',
-      'date_of_birth',
-      'prefix',
-      'citizen_number',
-      'address'
-    ]))
-  }
-
-  public async register(data: RegisterInput): Promise<RegisterOutput> {
-    const now = new Date().toISOString()
-
-    const app = await this._getApp(data.app_key, data.secret_key)
-
-    const isExists = await this.find({
-      email: data.email,
-      application: app.code
-    })
-
-    if (!_.isEmpty(isExists)) {
-      throwError('Email already exists', 'email_already_exists')
-    }
-
-    data['created_at'] = now
-    data['application'] = app.code
-
-    const settings = await this._getAuthenticationSetting()
-    const newPassword = this._hashPassword(
-      data['password'],
-      data
-    )
-
-    const { password_histories } = this._checkValidPassword(
-      data.password,
-      newPassword,
-      null,
-      settings
-    )
-
-    data['username'] = data['email']
-    data['role'] = UserRole.customer
-    data['state'] = UserState.active
-    data['password'] = newPassword
-    data['password_histories'] = password_histories
-    data['password_information'] = {
-      password_at: new Date(),
-      wrong_attempt: 0
-    }
-
-    if (data.register_token) {
-      const redisData = await redisSession.get(generateRegisterKey(data.register_token))
-      if (redisData?.['channel']) _.set(data, `social.${redisData['channel']}`, redisData['profile']['id'])
-    }
-
-    const res = await this.create(data)
-
-    const { ref } = await generateOtp({
-      id: res.id,
-      user_id: res.user_id,
-      email: data['email'],
-      app,
-      type: OtpAction.register
-    })
-
-    return {
-      ref
-    }
-  }
-
-  public async verifyOtp(data: VerifyOtpInput): Promise<CommonResult | AuthenticationOutput> {
-    const securitySettings = await this._getSecuritySetting()
-    const otpData = await validateOtp(data.otp, securitySettings)
-
-    if (otpData.data['type'] === OtpAction.register) {
-      const user = await this.update(otpData.data['id'], {
-        state: UserState.active
-      })
-
-      const app = otpData.data['app']
-      const token = randomString(ACCESS_TOKEN_LENGTH)
-      const session = {
-        user: _.omit(user, ['password']),
-        application: _.omit(app, ['secret_key'])
-      }
-
-      await redisSession.set(
-        generateTokenKey(token),
-        session,
-        ACCESS_TOKEN_TTL
-      )
-
-      return {
-        token,
-        expires_in: ACCESS_TOKEN_TTL
-      }
-    }
-
-    if (otpData.data['type'] === OtpAction.forgot_password) {
-      const redisKey = generateResetPasswordToken(otpData.data['reset_password_token'])
-      const redisData = await redisCache.get(redisKey)
-      await redisCache.set(redisKey, {
-        ...redisData,
-        is_verify: true
-      })
-    }
-
-    return { status: true }
-  }
-
-  public async resendOtp(data: ResendOtpInput): Promise<ResendOtpOutput> {
-    const { ref, otp, data: redisData } = await resendOtp(data.ref)
-
-    return { ref }
   }
 
   public async login(data: LoginInput): Promise<LoginOutput> {
@@ -482,82 +310,4 @@ export class UserService extends BaseService<User> {
     }
   }
 
-  public async forgotPassword(data: ForgotPasswordInput): Promise<ForgotPasswordOutput> {
-
-    const app = await this._getApp(data.app_key, data.secret_key)
-
-    const user = await this.find({
-      username: data.username,
-      application: app.code
-    })
-
-    const resetPasswordToken = randomString(RESET_PASSWORD_TOKEN_LENGTH)
-
-    if (_.isEmpty(user)) {
-      return {
-        ref: randomString(REF_LENGTH),
-        reset_password_token: resetPasswordToken
-      }
-    }
-
-    const { ref, otp } = await generateOtp({
-      reset_password_token: resetPasswordToken,
-      type: OtpAction.forgot_password
-    })
-
-    await redisCache.set(generateResetPasswordToken(resetPasswordToken), {
-      id: user.id,
-      user_id: user.user_id,
-      email: data.username,
-      is_verify: false,
-    })
-
-    return {
-      ref,
-      reset_password_token: resetPasswordToken
-    }
-  }
-
-  public async resetPassword(data: ResetPasswordInput): Promise<CommonResult> {
-
-    const redisKey = generateResetPasswordToken(data.reset_password_token)
-    const redisData = await redisCache.get(redisKey)
-
-    if (_.isEmpty(redisData) || !_.get(redisData, 'is_verify')) {
-      throwError('Invalid reset password token', 'invalid_reset_password_token')
-    }
-
-    const user = await this.findByUserId(redisData.user_id)
-    const settings = await this._getAuthenticationSetting()
-
-    const { password_policy } = settings
-
-    const notAllowToChange = password_policy.minimum_password_age > 0
-      && dayjs(user.password_information?.password_at).add(password_policy.minimum_password_age, 'day') > dayjs()
-
-    if (notAllowToChange) {
-      throwError('Minimum password age', 'minimum_password_age')
-    }
-
-    const newPassword = generateHash(data.new_password, user['created_at'])
-    const { password_histories } = await this._checkValidPassword(
-      data.new_password,
-      newPassword,
-      user,
-      settings
-    )
-
-    await this.update(user.id, {
-      password: newPassword,
-      password_histories,
-      password_information: {
-        password_at: new Date(),
-        wrong_attempt: 0
-      }
-    })
-
-    await redisCache.del(redisKey)
-
-    return { status: true }
-  }
 }

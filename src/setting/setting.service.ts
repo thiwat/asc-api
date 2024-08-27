@@ -60,6 +60,7 @@ export class SettingService extends BaseService<Setting> {
     const authen = await this.getSetting('authentication', 'authentication')
     const security = await this.getSetting('security', 'security')
     const siteSetting = await this.getSetting('site', 'site')
+    const integrationSetting = await this.getSetting('integration', 'integration')
     const key = app.code === DEFAULT_APPLICATION_CODE
       ? 'admin'
       : 'site'
@@ -70,6 +71,7 @@ export class SettingService extends BaseService<Setting> {
         case: authen?.password_policy?.password_case || [],
         minimum_length: authen?.password_policy?.minimum_length
       },
+      line: integrationSetting?.line,
       recaptcha: {
         ..._.omit(security.recaptcha, ['secret_key']),
         enabled: app.use_recaptcha

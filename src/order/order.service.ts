@@ -14,6 +14,7 @@ import { generateRunningNumber } from 'src/common/utils/running_number';
 import { SettingService } from 'src/setting/setting.service';
 import { OrderSettings } from 'src/setting/dto/order.dto';
 import { TicketService } from 'src/ticket/ticket.service';
+import { generatePromptPay } from 'src/common/utils/payment';
 
 @Injectable()
 export class OrderService extends BaseService<Order> {
@@ -50,16 +51,21 @@ export class OrderService extends BaseService<Order> {
       throwError('Exceed maximum quantity', 'exceed_maximum_quantity')
     }
 
+    const totalAmount = data.quantity * event.price
+
     const settings = await this._getSettings()
 
     const orderNo = await this._generateRunningNumber(settings.running_format || 'ASCYYMMRRRR')
+    const qrcode = await generatePromptPay(settings.account_no, totalAmount)
 
     const order = await this.create({
       order_no: orderNo,
       status: OrderStatus.pending_payment,
       event: data.event,
       user_id: profile.user_id,
-      quantity: data.quantity
+      quantity: data.quantity,
+      total_amount: totalAmount,
+      qrcode
     })
 
     await this.eventService.updateSoldQty(data.event, data.quantity)

@@ -9,27 +9,15 @@ import {
   Put,
   Query,
 } from "@nestjs/common";
-import { AuthenticationOutput } from "src/auth/auth.dto";
 import { HideFields } from "src/common/decorators/hide.decorator";
 import { Profile } from "src/common/decorators/profile.decorator";
-import { Public } from "src/common/decorators/public.decorator";
 import { Roles } from "src/common/decorators/role.decorator";
-import { CommonResult } from "src/common/dto/common_result.dto";
 import { SearchQueryDto } from "src/common/dto/search_query.dto";
 import { SearchResultDto } from "src/common/dto/search_result.dto";
 import { UserRole } from "src/common/enums/role.enum";
 import { convertFilter } from "src/common/utils/filter";
 import {
   CreateUserInput,
-  ForgotPasswordInput,
-  ForgotPasswordOutput,
-  RegisterInput,
-  RegisterOutput,
-  ResendOtpInput,
-  ResendOtpOutput,
-  ResetPasswordInput,
-  UpdateMyProfileInput,
-  VerifyOtpInput
 } from "./user.dto";
 import { User } from "./user.schema";
 import { UserService } from "./user.service";
@@ -67,46 +55,6 @@ export class UserController {
     return this.service.createUser(body)
   }
 
-  @Public()
-  @Post('/register')
-  async register(
-    @Body() body: RegisterInput
-  ): Promise<RegisterOutput> {
-    return this.service.register(body)
-  }
-
-  @Public()
-  @Post('/verify')
-  async verifyOtp(
-    @Body() body: VerifyOtpInput
-  ): Promise<CommonResult | AuthenticationOutput> {
-    return this.service.verifyOtp(body)
-  }
-
-  @Public()
-  @Post('/resend')
-  async resendOtp(
-    @Body() body: ResendOtpInput
-  ): Promise<ResendOtpOutput> {
-    return this.service.resendOtp(body)
-  }
-
-  @Public()
-  @Post('/password/forgot')
-  async forgotPassword(
-    @Body() body: ForgotPasswordInput
-  ): Promise<ForgotPasswordOutput> {
-    return this.service.forgotPassword(body)
-  }
-
-  @Public()
-  @Post('/password/reset')
-  async resetPassword(
-    @Body() body: ResetPasswordInput
-  ): Promise<CommonResult> {
-    return this.service.resetPassword(body)
-  }
-
   @Roles([UserRole.admin])
   @Put('/:user_id')
   async update(
@@ -130,15 +78,6 @@ export class UserController {
     @Profile() profile: any
   ): Promise<User> {
     return this.service.myProfile(profile)
-  }
-
-  @Roles([UserRole.admin, UserRole.customer])
-  @Put('/me')
-  async updateMyProfile(
-    @Body() data: UpdateMyProfileInput,
-    @Profile() profile: any
-  ): Promise<User> {
-    return this.service.updateMyProfile(data, profile)
   }
 
   @Roles([UserRole.admin])

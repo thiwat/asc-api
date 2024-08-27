@@ -6,7 +6,6 @@ import {
 } from "@nestjs/common";
 import { AuthService } from './auth.service'
 import {
-  ActivateAccountInput,
   AuthenticationInput,
   AuthenticationLineInput,
   AuthenticationOutput,
@@ -22,14 +21,6 @@ import { RecaptchaGuard } from "src/common/guards/recaptcha.guard";
 })
 export class AuthController {
   constructor(protected readonly service: AuthService) { }
-
-  @Public()
-  @Post('/activate')
-  async activateAccount(
-    @Body() body: ActivateAccountInput
-  ): Promise<AuthenticationOutput> {
-    return this.service.activateAccount(body)
-  }
 
   @Public()
   @UseGuards(RecaptchaGuard)

@@ -25,8 +25,14 @@ export class Order extends BaseSchema {
   @Prop({})
   quantity: number;
 
-  @Prop({ type: mongoose.Schema.Types.Mixed })
-  slip_url: any;
+  @Prop({})
+  total_amount: number;
+
+  @Prop()
+  slip_url: string;
+
+  @Prop()
+  qrcode: string;
 }
 
 export const OrderSchema = BaseSchemaFactory.createForClass(Order);

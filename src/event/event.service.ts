@@ -8,13 +8,16 @@ import { RewriteUrlType } from 'src/common/enums/rewrite_url.enum';
 import { Event } from './event.schema';
 import { EventInput } from './event.dto';
 import { RewriteUrlService } from 'src/rewrite_url/rewrite_url.service';
+import { Profile } from 'src/common/dto/profile.dto';
+import { TicketService } from 'src/ticket/ticket.service';
 
 @Injectable()
 export class EventService extends BaseService<Event> {
   constructor(
     @InjectModel(_.snakeCase(Event.name))
     protected model: mongoose.Model<Event>,
-    private rewriteUrlService: RewriteUrlService
+    private rewriteUrlService: RewriteUrlService,
+    private ticketService: TicketService
   ) {
     super(model);
   }
@@ -62,6 +65,30 @@ export class EventService extends BaseService<Event> {
   public async deleteByCode(code: string): Promise<Event> {
     const order = await this.findByCode(code)
     return await this.delete(order.id)
+  }
+
+  public async myEvents(profile: Profile): Promise<any> {
+    const tickets = await this.ticketService.list({
+      filter: {
+        user_id: profile.user_id
+      }
+    })
+
+    const eventsCode = _.uniq(tickets.map(i => i.event))
+    const events = await this.list({
+      filter: { code: { $in: eventsCode } },
+      sort: '-event_start_date'
+    })
+
+    const res = []
+    for (const event of events) {
+      res.push({
+        event,
+        tickets: tickets.filter(i => i.event === event.code)
+      })
+    }
+
+    return res
   }
 
 }

@@ -18,6 +18,7 @@ import { SiteSetting } from "./dto/site.dto";
 import { Basic } from "src/common/decorators/basic.decorator";
 import { Application } from "src/common/decorators/application.decorator";
 import { OrderSettings } from "./dto/order.dto";
+import { IntegrationSettings } from "./dto/integration.dto";
 
 const DEFAULT_LOCALE = 'en-US'
 
@@ -59,6 +60,18 @@ export class SettingController {
     @Body() data: AttachmentSetting
   ): Promise<AttachmentSetting> {
     return await this.service.setSetting('attachment', data, 'attachment')
+  }
+
+  @Get('/integration')
+  async getIntegrationSetting(): Promise<IntegrationSettings> {
+    return await this.service.getSetting('integration', 'integration', {})
+  }
+
+  @Put('/integration')
+  async setIntegrationSetting(
+    @Body() data: IntegrationSettings
+  ): Promise<IntegrationSettings> {
+    return await this.service.setSetting('integration', data, 'integration')
   }
 
   @Get('/site')

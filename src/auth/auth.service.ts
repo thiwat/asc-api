@@ -3,7 +3,6 @@ import { Injectable } from "@nestjs/common";
 import { Logger } from 'winston';
 import logger from 'src/common/utils/logger';
 import {
-  ActivateAccountInput,
   AuthenticationInput,
   AuthenticationLineInput,
   AuthenticationOutput,
@@ -140,7 +139,12 @@ export class AuthService {
         profile_image: { url: lineProfile.picture },
         social: { line: lineProfile.sub },
         role: UserRole.customer,
-        state: UserState.active
+        state: UserState.active,
+        last_logged_in_at: new Date()
+      })
+    } else {
+      await this.userService.updateByUserId(user.user_id, {
+        last_logged_in_at: new Date()
       })
     }
 
@@ -162,48 +166,6 @@ export class AuthService {
       username: lineProfile.sub
     })
 
-
-    await redisSession.set(
-      generateTokenKey(token),
-      session,
-      ACCESS_TOKEN_TTL
-    )
-
-    return {
-      token,
-      expires_in: ACCESS_TOKEN_TTL
-    }
-  }
-
-  public async activateAccount(data: ActivateAccountInput): Promise<AuthenticationOutput> {
-
-    const redisData = await redisSession.get(generateActivateTokenKey(data.activate_token))
-    if (_.isEmpty(redisData)) throwError('Invalid activate token', 'invalid_activate_token')
-
-    const { application: app } = redisData
-
-    const user = await this.userService.activateAccount({
-      user_id: redisData.user.user_id,
-      password: data.password
-    })
-
-    if (!app.roles.includes(user.role)) {
-      this.logger.error('User role cannot access this application', {
-        username: user.username,
-        application: app.code
-      })
-      throwError('Invalid username or password', 'invalid_username_or_password')
-    }
-
-    const token = randomString(ACCESS_TOKEN_LENGTH)
-    const session = {
-      user: _.omit(user, ['password']),
-      application: _.omit(app, ['secret_key'])
-    }
-
-    this.logger.info('Activate account success', {
-      username: user.username
-    })
 
     await redisSession.set(
       generateTokenKey(token),

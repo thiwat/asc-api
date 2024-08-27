@@ -1,3 +1,4 @@
+import * as _ from 'lodash'
 import {
   Body,
   Controller,
@@ -6,7 +7,6 @@ import {
   Post,
   Query
 } from "@nestjs/common";
-import { Roles } from "src/common/decorators/role.decorator";
 import { SearchQueryDto } from "src/common/dto/search_query.dto";
 import { SearchResultDto } from "src/common/dto/search_result.dto";
 import { UserRole } from "src/common/enums/role.enum";
@@ -25,12 +25,15 @@ export class OrderController {
     protected readonly service: OrderService
   ) { }
 
-  @Roles([UserRole.admin])
   @Get('/')
   async list(
-    @Query() query: SearchQueryDto
+    @Query() query: SearchQueryDto,
+    @Profile() profile: any,
   ): Promise<SearchResultDto> {
     query.filter = convertFilter(query.filter)
+    if (profile.role === UserRole.customer) {
+      _.set(query, 'filter.user_id', profile.user_id)
+    }
     return this.service.search(query)
   }
 

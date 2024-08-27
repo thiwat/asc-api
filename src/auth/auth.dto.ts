@@ -30,14 +30,6 @@ export class RevokeTokenInput {
   token: string;
 }
 
-export class ActivateAccountInput {
-  @IsString()
-  activate_token: string;
-
-  @IsString()
-  password: string;
-}
-
 export class AuthenticationOutput {
   token?: string;
   expires_in?: number;

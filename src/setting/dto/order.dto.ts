@@ -6,4 +6,7 @@ import {
 export class OrderSettings {
   @IsString()
   running_format: string;
+
+  @IsString()
+  account_no: string;
 }
