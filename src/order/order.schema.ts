@@ -16,6 +16,9 @@ export class Order extends BaseSchema {
   @Prop({ required: true })
   user_id: string;
 
+  @Prop()
+  user_name: string;
+
   @Prop({})
   event: string;
 
@@ -33,6 +36,9 @@ export class Order extends BaseSchema {
 
   @Prop()
   qrcode: string;
+
+  @Prop()
+  paid_date?: Date;
 }
 
 export const OrderSchema = BaseSchemaFactory.createForClass(Order);

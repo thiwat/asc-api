@@ -63,6 +63,7 @@ export class OrderService extends BaseService<Order> {
       status: OrderStatus.pending_payment,
       event: data.event,
       user_id: profile.user_id,
+      user_name: profile.full_name,
       quantity: data.quantity,
       total_amount: totalAmount,
       qrcode
@@ -71,6 +72,10 @@ export class OrderService extends BaseService<Order> {
     await this.eventService.updateSoldQty(data.event, data.quantity)
 
     return order
+  }
+
+  public async findByOrderNo(orderNo: string): Promise<Order> {
+    return this.find({ order_no: orderNo })
   }
 
   public async uploadSlip(data: UploadSlipInput, profile: Profile): Promise<Order> {
@@ -87,7 +92,11 @@ export class OrderService extends BaseService<Order> {
       throwError('Invalid order status', 'invalid_order_status')
     }
 
-    return await this.update(order.id, { slip_url: data.slip_url, status: OrderStatus.paid })
+    return await this.update(order.id, {
+      slip_url: data.slip_url,
+      status: OrderStatus.paid,
+      paid_date: new Date()
+    })
   }
 
   public async approvePayment(data: ApprovePaymentInput): Promise<Order> {

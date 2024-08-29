@@ -13,7 +13,6 @@ import {
 } from "./auth.dto";
 import { Public } from "src/common/decorators/public.decorator";
 import { CommonResult } from "src/common/dto/common_result.dto";
-import { RecaptchaGuard } from "src/common/guards/recaptcha.guard";
 
 @Controller({
   path: 'auth',
@@ -23,7 +22,6 @@ export class AuthController {
   constructor(protected readonly service: AuthService) { }
 
   @Public()
-  @UseGuards(RecaptchaGuard)
   @Post('/access_token')
   async authentication(
     @Body() body: AuthenticationInput

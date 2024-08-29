@@ -3,6 +3,7 @@ import {
   Body,
   Controller,
   Get,
+  Param,
   Patch,
   Post,
   Query
@@ -15,6 +16,7 @@ import { OrderService } from "./order.service";
 import { ApprovePaymentInput, PlaceOrderInput, UploadSlipInput } from "./order.dto";
 import { Profile } from "src/common/decorators/profile.decorator";
 import { Order } from "./order.schema";
+import { Roles } from 'src/common/decorators/role.decorator';
 
 @Controller({
   path: 'order',
@@ -35,6 +37,14 @@ export class OrderController {
       _.set(query, 'filter.user_id', profile.user_id)
     }
     return this.service.search(query)
+  }
+
+  @Roles([UserRole.admin])
+  @Get('/:order_no')
+  async lis(
+    @Param('order_no') orderNo: string,
+  ): Promise<Order> {
+    return this.service.findByOrderNo(orderNo)
   }
 
   @Post('/')

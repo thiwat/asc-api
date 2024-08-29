@@ -6,16 +6,6 @@ import {
   ValidateNested
 } from "class-validator";
 
-export class SecurityRecaptcha {
-  @IsOptional()
-  @IsString()
-  site_key: string;
-
-  @IsOptional()
-  @IsString()
-  secret_key: string;
-}
-
 export class SecurityUniversalOtp {
   @IsOptional()
   @IsBoolean()
@@ -27,11 +17,6 @@ export class SecurityUniversalOtp {
 }
 
 export class SecuritySetting {
-  @IsObject()
-  @IsOptional()
-  @ValidateNested()
-  recaptcha?: SecurityRecaptcha
-
   @IsObject()
   @IsOptional()
   @ValidateNested()
