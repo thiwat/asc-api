@@ -16,6 +16,7 @@ import { RewriteUrlModule } from "./rewrite_url/rewrite_url.module";
 import { EventModule } from "./event/event.module";
 import { OrderModule } from "./order/order.module";
 import { TicketModule } from "./ticket/ticket.module";
+import { SurveyModule } from "./survey/survey.module";
 
 dotenv.config();
 
@@ -34,6 +35,7 @@ dotenv.config();
     SettingModule,
     OrderModule,
     RewriteUrlModule,
+    SurveyModule,
     TicketModule,
     UserModule,
   ],

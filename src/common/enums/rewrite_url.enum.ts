@@ -1,4 +1,5 @@
 export enum RewriteUrlType {
   cms_page = 'cms_page',
-  event = 'event'
+  event = 'event',
+  survey = 'survey'
 }
