@@ -1,10 +1,11 @@
 import { Type } from "class-transformer";
-import { IsString, ValidateNested } from "class-validator";
+import { IsOptional, IsString, ValidateNested } from "class-validator";
 
 export class SurveyAnswerItem {
   @IsString()
   code: string;
 
+  @IsOptional()
   @IsString()
   value?: string;
 }
