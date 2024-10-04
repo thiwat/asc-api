@@ -9,7 +9,11 @@ import {
 export class IntegrationLineSetting {
   @IsOptional()
   @IsString()
-  liff_id: string;
+  liff_id_register: string;
+
+  @IsOptional()
+  @IsString()
+  liff_id_tickets: string;
 
   @IsOptional()
   @IsBoolean()
