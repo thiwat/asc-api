@@ -48,6 +48,10 @@ export class OrderService extends BaseService<Order> {
 
     const order = await this.findByOrderNo(orderNo)
 
+    if (order.status !== OrderStatus.pending_payment) {
+      return order
+    }
+
     const res = await this.update(order.id, {
       slip_url: data.slip_url,
       status: OrderStatus.completed,
