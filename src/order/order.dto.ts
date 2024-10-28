@@ -24,3 +24,8 @@ export class ApprovePaymentInput {
   @IsString()
   order_no: string;
 }
+
+export class UpdateOrderInput {
+  @IsString()
+  slip_url: string;
+}

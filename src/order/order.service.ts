@@ -6,7 +6,7 @@ import { BaseService } from "src/common/base/base.service";
 import { InjectModel } from '@nestjs/mongoose';
 import { throwError } from 'src/common/utils/error';
 import { Order } from './order.schema';
-import { ApprovePaymentInput, PlaceOrderInput, UploadSlipInput } from './order.dto';
+import { ApprovePaymentInput, PlaceOrderInput, UpdateOrderInput, UploadSlipInput } from './order.dto';
 import { Profile } from 'src/common/dto/profile.dto';
 import { EventService } from 'src/event/event.service';
 import { OrderStatus } from 'src/common/enums/order.enum';
@@ -42,6 +42,26 @@ export class OrderService extends BaseService<Order> {
 
     const runningLength = format.match(/R[R]{1,}$/)[0]
     return generateRunningNumber('order', format.replace(runningLength, ''), runningLength.length)
+  }
+
+  public async updateByOrderNo(orderNo: string, data: UpdateOrderInput): Promise<Order> {
+
+    const order = await this.findByOrderNo(orderNo)
+
+    const res = await this.update(order.id, {
+      slip_url: data.slip_url,
+      status: OrderStatus.completed,
+      paid_date: new Date()
+    })
+
+    for (let i = 0; i < order.quantity; i++) {
+      await this.ticketService.issueTicket({
+        user_id: order.user_id,
+        event: order.event,
+      })
+    }
+
+    return res
   }
 
   public async placeOrder(data: PlaceOrderInput, profile: Profile): Promise<Order> {
