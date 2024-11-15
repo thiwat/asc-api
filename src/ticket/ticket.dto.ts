@@ -10,3 +10,8 @@ export class IssueTicketInput {
   @IsString()
   user_id: string;
 }
+
+export class MarkUsedTicketInputt {
+  @IsString()
+  code: string;
+}

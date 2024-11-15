@@ -20,6 +20,9 @@ export class Ticket extends BaseSchema {
 
   @Prop({})
   status: string;
+
+  @Prop()
+  used_date?: Date;
 }
 
 export const TicketSchema = BaseSchemaFactory.createForClass(Ticket);
