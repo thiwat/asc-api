@@ -1,23 +1,18 @@
 import {
-  IsPositive,
+  IsObject,
   IsString,
 } from "class-validator";
 
 
 export class PlaceOrderInput {
-  @IsString()
-  event?: string;
+  @IsObject()
+  user?: any;
 
-  @IsPositive()
-  quantity?: number;
-}
-
-export class UploadSlipInput {
-  @IsString()
-  order_no: string;
+  @IsObject()
+  items?: any;
 
   @IsString()
-  slip_url: string;
+  slip_url?: string;
 }
 
 export class ApprovePaymentInput {

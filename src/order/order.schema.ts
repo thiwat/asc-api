@@ -13,29 +13,20 @@ export class Order extends BaseSchema {
   @Prop({ required: true })
   order_no: string;
 
-  @Prop({ required: true })
-  user_id: string;
-
-  @Prop()
-  user_name: string;
-
-  @Prop({})
-  event: string;
+  @Prop({ type: mongoose.Schema.Types.Mixed })
+  user: any;
 
   @Prop({})
   status: string;
 
-  @Prop({})
-  quantity: number;
+  @Prop({ type: mongoose.Schema.Types.Mixed })
+  items?: any;
 
   @Prop({})
   total_amount: number;
 
   @Prop()
   slip_url: string;
-
-  @Prop()
-  qrcode: string;
 
   @Prop()
   paid_date?: Date;

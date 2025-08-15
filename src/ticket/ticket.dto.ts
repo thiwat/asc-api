@@ -5,10 +5,7 @@ import {
 
 export class IssueTicketInput {
   @IsString()
-  event?: string;
-
-  @IsString()
-  user_id: string;
+  user: string;
 }
 
 export class MarkUsedTicketInputt {

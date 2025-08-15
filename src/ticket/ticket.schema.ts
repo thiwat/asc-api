@@ -13,7 +13,7 @@ export class Ticket extends BaseSchema {
   code: string;
 
   @Prop({ required: true })
-  user_id: string;
+  user: string;
 
   @Prop({})
   event: string;

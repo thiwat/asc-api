@@ -17,16 +17,13 @@ import { UserRole } from 'src/common/enums/role.enum';
 import { Profile } from 'src/common/dto/profile.dto';
 import { UserState } from 'src/common/enums/user_state.enum';
 import { throwError } from 'src/common/utils/error';
-import { AuthenticationSettings } from 'src/setting/dto/authentication.dto';
 import { SettingService } from 'src/setting/setting.service';
-import { validatePasswordCase } from 'src/common/utils/password';
 import { randomString } from 'src/common/utils/random';
 import { ApplicationService } from 'src/application/application.service';
 import { SearchQueryDto } from 'src/common/dto/search_query.dto';
 import { SearchResultDto } from 'src/common/dto/search_result.dto';
 import { Application } from 'src/application/application.schema';
 import { DEFAULT_APPLICATION_CODE } from 'src/application/application.constant';
-import { SecuritySetting } from 'src/setting/dto/security.dto';
 
 @Injectable()
 export class UserService extends BaseService<User> {
@@ -45,14 +42,6 @@ export class UserService extends BaseService<User> {
 
   private _hashPassword = (password: string, user: Partial<User>): string => {
     return generateHash(password, `${user['created_at']}`)
-  }
-
-  private _getAuthenticationSetting = async (): Promise<AuthenticationSettings> => {
-    return this.settingService.getSetting('authentication', 'authentication')
-  }
-
-  private _getSecuritySetting = async (): Promise<SecuritySetting> => {
-    return this.settingService.getSetting('security', 'security')
   }
 
   private async _getApp(appKey: string, secretKey: string): Promise<Application> {
@@ -102,98 +91,6 @@ export class UserService extends BaseService<User> {
 
     this.logger.info('Create system admin')
     await this.create(user)
-  }
-
-  private _checkValidPassword = (
-    password: string,
-    hashPassword: string,
-    user: User,
-    settings: AuthenticationSettings
-  ): { password_histories: string[] } => {
-
-    const { password_policy } = settings
-
-    if (password_policy?.minimum_length && password.length < password_policy?.minimum_length) {
-      throwError('Invalid password length', 'invalid_password_length')
-    }
-
-    if (!validatePasswordCase(password, password_policy)) {
-      throwError('Invalid password case', 'invalid_password_case')
-    }
-
-    let passwordHistories: string[] = user?.password_histories || []
-    if (password_policy?.enforce_password_history > 0 && passwordHistories.includes(hashPassword)) {
-      throwError('Unable to reuse password', 'unable_to_reuse_password')
-    }
-
-    passwordHistories = [
-      ..._.takeRight(passwordHistories, password_policy?.enforce_password_history - 1),
-      hashPassword
-    ]
-
-    return {
-      password_histories: passwordHistories,
-    }
-  }
-
-  private _validatePassword = async (
-    password: string,
-    user: User
-  ): Promise<void> => {
-
-    const { password_policy } = await this._getAuthenticationSetting()
-
-    const isWrongPassword = user.password !== generateHash(password, user['created_at'])
-
-    if (!isWrongPassword) {
-      if (user.state === UserState.locked_out) {
-        await this.update(user.id, { state: UserState.active })
-      }
-      return
-    }
-
-    if (!(password_policy?.wrong_password_attempt > 0)) {
-      throwError('Invalid username or password', 'invalid_username_or_password')
-    }
-    const { password_information } = user
-
-    let count = password_information['wrong_attempt'] || 0
-
-    if (password_information?.wrong_attempt_at &&
-      (dayjs() > dayjs(password_information.wrong_attempt_at).add(password_policy.wrong_password_attempt_duration, 'minutes'))
-    ) {
-      password_information['wrong_attempt_at'] = null
-      count = 0
-    }
-
-    count = count + 1
-    password_information['wrong_attempt_at'] = password_information['wrong_attempt_at']
-      ? new Date(password_information['wrong_attempt_at'])
-      : new Date()
-
-    const isLock = count > password_policy.wrong_password_attempt
-
-    const lockDuration = isLock
-      ? password_policy['unlock_user_after_x_minutes'][count - password_policy.wrong_password_attempt - 1]
-      ?? _.last(password_policy['unlock_user_after_x_minutes'])
-      : 0
-
-    if (lockDuration > 0) {
-      password_information['lock_until'] = dayjs().add(lockDuration, 'minute').toDate()
-    }
-
-    password_information['wrong_attempt'] = count
-
-    await this.update(user.id, {
-      state: isLock
-        ? UserState.locked_out
-        : UserState.active,
-      password_information
-    })
-
-    isLock
-      ? throwError('Your account is locked', 'account_is_locked')
-      : throwError('Invalid username or password', 'invalid_username_or_password')
   }
 
   public async create(data: Partial<User>): Promise<User> {
@@ -295,14 +192,14 @@ export class UserService extends BaseService<User> {
       throwError('Your account is locked', 'account_is_locked')
     }
 
-    await this._validatePassword(data.password, user)
+    const isWrongPassword = user.password !== generateHash(data.password, user['created_at'])
+
+    if (isWrongPassword) {
+      throwError('Invalid username or password', 'invalid_username_or_password')
+    }
 
     await this.update(user.id, {
       last_logged_in_at: new Date(),
-      password_information: {
-        password_at: password_information?.password_at || new Date(),
-        wrong_attempt: 0
-      }
     })
 
     return {

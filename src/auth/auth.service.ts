@@ -4,7 +4,6 @@ import { Logger } from 'winston';
 import logger from 'src/common/utils/logger';
 import {
   AuthenticationInput,
-  AuthenticationLineInput,
   AuthenticationOutput,
   RevokeTokenInput,
 } from './auth.dto';
@@ -22,16 +21,12 @@ import { generateActivateTokenKey, generateTokenKey } from 'src/common/utils/key
 import { ApplicationService } from 'src/application/application.service';
 import { CommonResult } from 'src/common/dto/common_result.dto';
 import { Application } from 'src/application/application.schema';
-import { UserRole } from 'src/common/enums/role.enum';
-import { UserState } from 'src/common/enums/user_state.enum';
-import { LineService } from 'src/line/line.service';
 
 @Injectable()
 export class AuthService {
   private logger: Logger
   constructor(
     private applicationService: ApplicationService,
-    private lineService: LineService,
     private userService: UserService
   ) {
     this.logger = logger.child({ service: this.constructor.name })
@@ -104,66 +99,6 @@ export class AuthService {
 
     this.logger.info('Login success', {
       username: input.username
-    })
-
-
-    await redisSession.set(
-      generateTokenKey(token),
-      session,
-      ACCESS_TOKEN_TTL
-    )
-
-    return {
-      token,
-      expires_in: ACCESS_TOKEN_TTL
-    }
-  }
-
-  public async authenticationLine(
-    input: AuthenticationLineInput
-  ): Promise<AuthenticationOutput> {
-
-    const app = await this._getApp(input.app_key, input.secret_key)
-
-    const lineProfile = await this.lineService.getProfile(input.line_token)
-
-    let user = await this.userService.find({
-      social: { line: lineProfile.sub }
-    })
-
-    if (_.isEmpty(user)) {
-      user = await this.userService.create({
-        username: `LINE_${lineProfile.sub}`,
-        application: app.code,
-        full_name: lineProfile.name,
-        profile_image: { url: lineProfile.picture },
-        social: { line: lineProfile.sub },
-        role: UserRole.customer,
-        state: UserState.active,
-        last_logged_in_at: new Date()
-      })
-    } else {
-      await this.userService.updateByUserId(user.user_id, {
-        last_logged_in_at: new Date()
-      })
-    }
-
-    if (!app.roles.includes(user.role)) {
-      this.logger.error('User role cannot access this application', {
-        line_id: lineProfile.sub,
-        application: app.code
-      })
-      throwError('Invalid username or password', 'invalid_username_or_password')
-    }
-
-    const token = randomString(ACCESS_TOKEN_LENGTH)
-    const session = {
-      user: _.omit(user, ['password']),
-      application: _.omit(app, ['secret_key'])
-    }
-
-    this.logger.info('Login success', {
-      username: lineProfile.sub
     })
 
 

@@ -6,7 +6,6 @@ import {
   Param,
   Patch,
   Post,
-  Put,
   Query
 } from "@nestjs/common";
 import { SearchQueryDto } from "src/common/dto/search_query.dto";
@@ -14,10 +13,11 @@ import { SearchResultDto } from "src/common/dto/search_result.dto";
 import { UserRole } from "src/common/enums/role.enum";
 import { convertFilter } from "src/common/utils/filter";
 import { OrderService } from "./order.service";
-import { ApprovePaymentInput, PlaceOrderInput, UpdateOrderInput, UploadSlipInput } from "./order.dto";
+import { ApprovePaymentInput, PlaceOrderInput } from "./order.dto";
 import { Profile } from "src/common/decorators/profile.decorator";
 import { Order } from "./order.schema";
 import { Roles } from 'src/common/decorators/role.decorator';
+import { Public } from 'src/common/decorators/public.decorator';
 
 @Controller({
   path: 'order',
@@ -48,29 +48,12 @@ export class OrderController {
     return this.service.findByOrderNo(orderNo)
   }
 
-  @Roles([UserRole.admin])
-  @Put('/:order_no')
-  async update(
-    @Param('order_no') orderNo: string,
-    @Body() data: UpdateOrderInput
-  ): Promise<Order> {
-    return this.service.updateByOrderNo(orderNo, data)
-  }
-
+  @Public()
   @Post('/')
   async placeOrder(
     @Body() data: PlaceOrderInput,
-    @Profile() profile: any
   ): Promise<Order> {
-    return await this.service.placeOrder(data, profile)
-  }
-
-  @Patch('/slip')
-  async uploadSlip(
-    @Body() data: UploadSlipInput,
-    @Profile() profile: any
-  ): Promise<Order> {
-    return await this.service.uploadSlip(data, profile)
+    return await this.service.placeOrder(data)
   }
 
   @Patch('/approve')

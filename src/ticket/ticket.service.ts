@@ -21,8 +21,7 @@ export class TicketService extends BaseService<Ticket> {
   public async issueTicket(data: IssueTicketInput): Promise<Ticket> {
     return await this.create({
       code: uuid(),
-      user_id: data.user_id,
-      event: data.event,
+      user: data.user,
       status: TicketStatus.not_used
     })
   }

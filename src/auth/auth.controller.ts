@@ -2,12 +2,10 @@ import {
   Body,
   Controller,
   Post,
-  UseGuards,
 } from "@nestjs/common";
 import { AuthService } from './auth.service'
 import {
   AuthenticationInput,
-  AuthenticationLineInput,
   AuthenticationOutput,
   RevokeTokenInput,
 } from "./auth.dto";
@@ -27,14 +25,6 @@ export class AuthController {
     @Body() body: AuthenticationInput
   ): Promise<AuthenticationOutput> {
     return this.service.authentication(body)
-  }
-
-  @Public()
-  @Post('/social/line')
-  async authenticationLine(
-    @Body() body: AuthenticationLineInput
-  ): Promise<AuthenticationOutput> {
-    return this.service.authenticationLine(body)
   }
 
   @Public()

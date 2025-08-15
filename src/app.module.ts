@@ -10,13 +10,8 @@ import { AuthModule } from "./auth/auth.module";
 import { SettingModule } from "./setting/setting.module";
 import { BullModule } from "@nestjs/bull";
 import { AttachmentModule } from "./attachment/attachment.module";
-import { CmsBlockModule } from "./cms_block/cms_block.module";
-import { CmsPageModule } from "./cms_page/cms_page.module";
-import { RewriteUrlModule } from "./rewrite_url/rewrite_url.module";
-import { EventModule } from "./event/event.module";
 import { OrderModule } from "./order/order.module";
 import { TicketModule } from "./ticket/ticket.module";
-import { SurveyModule } from "./survey/survey.module";
 
 dotenv.config();
 
@@ -29,13 +24,8 @@ dotenv.config();
     ApplicationModule,
     AttachmentModule,
     AuthModule,
-    CmsBlockModule,
-    CmsPageModule,
-    EventModule,
     SettingModule,
     OrderModule,
-    RewriteUrlModule,
-    SurveyModule,
     TicketModule,
     UserModule,
   ],

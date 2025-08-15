@@ -5,9 +5,7 @@ import { MongooseModule } from "@nestjs/mongoose";
 import { Order, OrderSchema } from "./order.schema";
 import { OrderController } from "./order.controller";
 import { OrderService } from "./order.service";
-import { EventModule } from "src/event/event.module";
 import { TicketModule } from "src/ticket/ticket.module";
-
 
 @Module({
   imports: [
@@ -20,7 +18,6 @@ import { TicketModule } from "src/ticket/ticket.module";
         },
       },
     ]),
-    EventModule,
     TicketModule
   ],
   controllers: [OrderController],

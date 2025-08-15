@@ -10,15 +10,11 @@ import { SettingInterceptor } from "src/common/interceptors/setting.interceptor"
 import { SettingService } from "./setting.service";
 import * as _ from "lodash"
 import { Public } from "src/common/decorators/public.decorator";
-import { AuthenticationSettings } from "./dto/authentication.dto";
 import { DEFAULT_ADMIN_TRANSLATE, DEFAULT_SITE_TRANSLATE } from "src/common/constants/translates";
-import { SecuritySetting } from "./dto/security.dto";
 import { AttachmentSetting } from "./dto/attachment.dto";
-import { SiteSetting } from "./dto/site.dto";
 import { Basic } from "src/common/decorators/basic.decorator";
 import { Application } from "src/common/decorators/application.decorator";
 import { OrderSettings } from "./dto/order.dto";
-import { IntegrationSettings } from "./dto/integration.dto";
 
 const DEFAULT_LOCALE = 'en-US'
 
@@ -49,7 +45,6 @@ export class SettingController {
     return await this.service.setSetting(`admin_${locale || DEFAULT_LOCALE}`, data, 'translate')
   }
 
-
   @Get('/attachment')
   async getAttachmentSetting(): Promise<AttachmentSetting> {
     return await this.service.getSetting('attachment', 'attachment', {})
@@ -62,30 +57,6 @@ export class SettingController {
     return await this.service.setSetting('attachment', data, 'attachment')
   }
 
-  @Get('/integration')
-  async getIntegrationSetting(): Promise<IntegrationSettings> {
-    return await this.service.getSetting('integration', 'integration', {})
-  }
-
-  @Put('/integration')
-  async setIntegrationSetting(
-    @Body() data: IntegrationSettings
-  ): Promise<IntegrationSettings> {
-    return await this.service.setSetting('integration', data, 'integration')
-  }
-
-  @Get('/site')
-  async getSiteSetting(): Promise<SiteSetting> {
-    return await this.service.getSetting('site', 'site', {})
-  }
-
-  @Put('/site')
-  async setSiteSetting(
-    @Body() data: SiteSetting
-  ): Promise<SiteSetting> {
-    return await this.service.setSetting('site', data, 'site')
-  }
-
   @Get('/order')
   async getOrderSetting(): Promise<OrderSettings> {
     return await this.service.getSetting('order', 'order', {})
@@ -96,18 +67,6 @@ export class SettingController {
     @Body() data: OrderSettings
   ): Promise<OrderSettings> {
     return await this.service.setSetting('order', data, 'order')
-  }
-
-  @Get('/security')
-  async getSecuritySetting(): Promise<SecuritySetting> {
-    return await this.service.getSetting('security', 'security', {})
-  }
-
-  @Put('/security')
-  async setSecuritySetting(
-    @Body() data: SecuritySetting
-  ): Promise<SecuritySetting> {
-    return await this.service.setSetting('security', data, 'security')
   }
 
   @Public()
@@ -124,18 +83,6 @@ export class SettingController {
     @Body() data: object
   ): Promise<object> {
     return await this.service.setSetting(`site_${locale || DEFAULT_LOCALE}`, data, 'translate')
-  }
-
-  @Get('/authentication')
-  async getAuthenticationSetting(): Promise<AuthenticationSettings> {
-    return await this.service.getSetting('authentication', 'authentication', {})
-  }
-
-  @Put('/authentication')
-  async setAuthenticationSettinng(
-    @Body() data: AuthenticationSettings
-  ): Promise<AuthenticationSettings> {
-    return await this.service.setSetting('authentication', data, 'authentication')
   }
 
   @Basic()
