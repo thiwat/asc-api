@@ -6,9 +6,12 @@ import {
 export class IssueTicketInput {
   @IsString()
   user: string;
+
+  @IsString()
+  order: string;
 }
 
-export class MarkUsedTicketInputt {
+export class MarkUsedTicketInput {
   @IsString()
   code: string;
 }

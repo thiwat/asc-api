@@ -24,3 +24,8 @@ export class UpdateOrderInput {
   @IsString()
   slip_url: string;
 }
+
+export class ListTicketsInput {
+  @IsString()
+  order_no: string;
+}

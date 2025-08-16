@@ -5,7 +5,7 @@ import { Injectable } from "@nestjs/common";
 import { BaseService } from "src/common/base/base.service";
 import { InjectModel } from '@nestjs/mongoose';
 import { Ticket } from './ticket.schema';
-import { IssueTicketInput, MarkUsedTicketInputt } from './ticket.dto';
+import { IssueTicketInput, MarkUsedTicketInput } from './ticket.dto';
 import { TicketStatus } from 'src/common/enums/ticket.enum';
 import { CommonResult } from 'src/common/dto/common_result.dto';
 
@@ -22,11 +22,12 @@ export class TicketService extends BaseService<Ticket> {
     return await this.create({
       code: uuid(),
       user: data.user,
-      status: TicketStatus.not_used
+      status: TicketStatus.not_used,
+      order: data.order,
     })
   }
 
-  public async markUsedTicket(data: MarkUsedTicketInputt): Promise<CommonResult> {
+  public async markUsedTicket(data: MarkUsedTicketInput): Promise<CommonResult> {
     const ticket = await this.find({ code: data.code })
 
     if (ticket.status !== TicketStatus.not_used) {

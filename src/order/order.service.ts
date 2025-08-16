@@ -6,7 +6,7 @@ import { BaseService } from "src/common/base/base.service";
 import { InjectModel } from '@nestjs/mongoose';
 import { throwError } from 'src/common/utils/error';
 import { Order } from './order.schema';
-import { ApprovePaymentInput, PlaceOrderInput } from './order.dto';
+import { ApprovePaymentInput, ListTicketsInput, PlaceOrderInput } from './order.dto';
 import { OrderStatus } from 'src/common/enums/order.enum';
 import { generateRunningNumber } from 'src/common/utils/running_number';
 import { SettingService } from 'src/setting/setting.service';
@@ -86,9 +86,20 @@ export class OrderService extends BaseService<Order> {
       + (order.items?.extra_ticket || 0)
 
     for (let i = 0; i < totalTickets; i++) {
-      await this.ticketService.issueTicket({ user: order?.user?.email })
+      await this.ticketService.issueTicket({
+        user: order?.user?.email,
+        order: order.order_no
+      })
     }
 
     return res
+  }
+
+  public async listTickets(data: ListTicketsInput): Promise<any> {
+    const tickets = await this.ticketService.list({
+      filter: { order: data.order_no }
+    })
+
+    return tickets
   }
 }

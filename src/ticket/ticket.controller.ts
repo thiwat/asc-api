@@ -4,7 +4,7 @@ import {
   Patch,
 } from "@nestjs/common";
 import { TicketService } from "./ticket.service";
-import { MarkUsedTicketInputt } from "./ticket.dto";
+import { MarkUsedTicketInput } from "./ticket.dto";
 import { CommonResult } from "src/common/dto/common_result.dto";
 import { Public } from "src/common/decorators/public.decorator";
 
@@ -20,7 +20,7 @@ export class TicketController {
   @Public()
   @Patch('/mark_used')
   async updateByCode(
-    @Body() data: MarkUsedTicketInputt
+    @Body() data: MarkUsedTicketInput
   ): Promise<CommonResult> {
     return this.service.markUsedTicket(data)
   }

@@ -42,10 +42,18 @@ export class OrderController {
 
   @Roles([UserRole.admin])
   @Get('/:order_no')
-  async lis(
+  async findByOrderNo(
     @Param('order_no') orderNo: string,
   ): Promise<Order> {
     return this.service.findByOrderNo(orderNo)
+  }
+
+  @Roles([UserRole.admin])
+  @Get('/:order_no/tickets')
+  async listTickets(
+    @Param('order_no') orderNo: string
+  ): Promise<any> {
+    return this.service.listTickets({ order_no: orderNo })
   }
 
   @Public()

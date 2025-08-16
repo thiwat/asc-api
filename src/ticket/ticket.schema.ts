@@ -16,7 +16,7 @@ export class Ticket extends BaseSchema {
   user: string;
 
   @Prop({})
-  event: string;
+  order: string;
 
   @Prop({})
   status: string;
